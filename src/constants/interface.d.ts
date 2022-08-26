@@ -10,12 +10,12 @@ interface ListWidgetState {
     id?: string,
 	name: string,
 	widgetType?: number,
-	sensor?: number
+	sensor?: number,
 };
 
 interface WIDGET_TYPE {
     name: string;
-    value: 1 | 2;
+    value: number;
 };
 
 interface SimpleValueProps {
@@ -32,4 +32,4 @@ interface LineChartProps {
 
 interface ListDataSensor {
     [key: number]: ListSensorState
-}
+};

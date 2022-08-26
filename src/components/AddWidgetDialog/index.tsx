@@ -111,7 +111,7 @@ const AddWidgetDialog = ({
 				</DialogContent>
 				<DialogActions>
 					<Button onClick={() => onClose()}>Close</Button>
-					<Button variant="contained" type="submit">
+					<Button variant="contained" type="submit" disabled={(name === '') || (widgetType === undefined) || (sensorId === undefined)}>
 						Add
 					</Button>
 				</DialogActions>

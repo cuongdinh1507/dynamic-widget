@@ -1,84 +1,64 @@
-import { Button, Card, CardContent, CardHeader, Grid, IconButton, Theme, Typography } from "@mui/material";
-import { makeStyles, createStyles } from "@mui/styles";
-import React, { useEffect, useState } from "react";
-import AddWidgetDialog from "../../components/AddWidgetDialog";
 import CloseIcon from '@mui/icons-material/Close';
-import SimpleValue from "../../components/SimpleValue";
-import LineChart from "../../components/LineChart";
+import ImportExportIcon from '@mui/icons-material/ImportExport';
+import SyncIcon from '@mui/icons-material/Sync';
+import { Button, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import { DragEvent, MouseEvent, useEffect, useState } from 'react';
+import AddWidgetDialog from '../../components/AddWidgetDialog';
+import LineChart from '../../components/LineChart';
+import SimpleValue from '../../components/SimpleValue';
+import { useStyles } from './useStyles';
 
 const fakeData = [
 	{
 		sensorId: 1,
-		sensor: "Temperature",
+		sensor: 'Temperature',
 		historicalData: [10, 20, 40, 30, 15],
 		value: 15,
-		unit: "°C",
+		unit: '°C',
 	},
 	{
 		sensorId: 2,
-		sensor: "Intensity",
+		sensor: 'Intensity',
 		data: 30,
 		historicalData: [1, 3, 20, 40, 50],
 		value: 50,
-		unit: "g",
+		unit: 'g',
 	},
 	{
 		sensorId: 3,
-		sensor: "Feeding",
+		sensor: 'Feeding',
 		historicalData: [49, 79, 39, 69, 64],
 		value: 35,
-		unit: "%",
+		unit: '%',
 	},
 	{
 		sensorId: 4,
-		sensor: "Oxygen",
+		sensor: 'Oxygen',
 		historicalData: [49, 79, 39, 69, 64],
 		value: 35,
-		unit: "%",
+		unit: '%',
 	},
 ];
-
-const useStyles = makeStyles((theme: Theme) =>
-	createStyles({
-		container: {
-			background: "linear-gradient(to right, #36d1dc, #5b86e5)",
-			width: "100vw",
-			height: "100vh",
-			textAlign: "center",
-		},
-		title: {
-			color: "#fff",
-			padding: "20px 0",
-		},
-		listWidget: {
-			backgroundColor: "#fff",
-			height: 300,
-			marginTop: "20px !important",
-		},
-		widgetItem: {
-			backgroundColor: "#e7e9eb",
-			border: "2px solid #e7e9eb",
-			// width: "200px",
-		},
-		widgetName: {
-			padding: "10px",
-			cursor: "move",
-		},
-		widgetContent: {
-			backgroundColor: "#fff",
-			padding: '30px'
-		},
-	})
-);
 
 const Dashboard = () => {
 	const classes = useStyles();
 
-	const [openDialogAddWidget, setOpenDialogAddWidget] =
-		useState<boolean>(false);
+	const [openDialogAddWidget, setOpenDialogAddWidget] = useState<boolean>(false);
 	const [listWidget, setListWidget] = useState<ListWidgetState[]>();
 	const [listSensor, setListSensor] = useState<ListSensorState[]>();
-	const [listDataSensor, setListDataSensor] = useState<ListDataSensor>();
+	const [currentMousePosition, setCurrentMousePosition] = useState<number[] | undefined>();
+
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const [selectedWidget, setSelectedWidget] = useState<ListWidgetState | null>();
+	const open = Boolean(anchorEl);
+
+	const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+		setAnchorEl(event.currentTarget);
+	};
+	const handleClose = () => {
+		setSelectedWidget(null);
+		setAnchorEl(null);
+	};
 
 	const handleOnCloseAddWidgetDialog: () => void = () => {
 		setOpenDialogAddWidget(false);
@@ -90,23 +70,94 @@ const Dashboard = () => {
 	};
 
 	const handleRemoveWidgetById = (id: string | undefined): void => {
-		setListWidget(listWidget?.filter((value: ListWidgetState) => value?.id !== id));
+		setListWidget(
+			listWidget?.filter((value: ListWidgetState) => value?.id !== id)
+		);
 	};
 
-	const getDataSensor = (): void => {
-		setListDataSensor(listSensor?.reduce((a, v) => ({ ...a, [v?.sensorId]: v}), {}) )
+	const handleChangeWidget = (index: number): void => {
+        if (listWidget instanceof Array) {
+            let cloneListSensor: ListWidgetState[] = [...listWidget];
+            cloneListSensor[index].widgetType = cloneListSensor[index].widgetType === 1 ? 2 : 1;
+            setListWidget(cloneListSensor);
+        };
+	};
+
+    const handleChangeSensor = (sensorId: number) => {
+        if (listWidget instanceof Array) {
+			const index = listWidget.findIndex(item => item?.id === selectedWidget?.id);
+            let cloneListSensor: ListWidgetState[] = [...listWidget];
+            cloneListSensor[index].sensor = sensorId;
+            setListWidget(cloneListSensor);
+            handleClose();
+        };
+    };
+
+	const onDragging = (
+		e: DragEvent<HTMLDivElement>,
+		id: string | undefined
+	): void => {
+		e.stopPropagation();
+		e.preventDefault();
+		if (id) {
+			const element: HTMLElement | null = document.getElementById(id);
+			const listWidgetElement = document.getElementById('listWidget');
+			if (
+				element &&
+				listWidgetElement &&
+				currentMousePosition !== undefined
+			) {
+				const offsetTopElement = e.clientY - listWidgetElement.offsetTop - currentMousePosition[1];
+				const offsetLeftElement = e.clientX - listWidgetElement.offsetLeft - currentMousePosition[0];
+				if (
+					offsetTopElement > 0 &&
+					offsetTopElement < listWidgetElement.offsetHeight - element.offsetHeight &&
+					offsetLeftElement > 0 &&
+					offsetLeftElement < listWidgetElement.offsetWidth - element.offsetWidth
+				) {
+					element.style.top = `${offsetTopElement}px`;
+					element.style.left = `${offsetLeftElement}px`;
+				}
+			}
+		}
+	};
+
+	const onDragStart = (
+		e: DragEvent<HTMLDivElement>,
+		id: string | undefined
+	): void => {
+		if (id) {
+			const element: HTMLElement | null = document.getElementById(id);
+			const listWidgetElement = document.getElementById('listWidget'); 
+			if (element && listWidgetElement) {
+				setCurrentMousePosition([
+					e.clientX - element.offsetLeft - listWidgetElement.offsetLeft,
+					e.clientY - element.offsetTop - listWidgetElement.offsetTop,
+				])
+			};
+		};
+	};
+
+	const getListSensor = () => {
+		// fetch(
+		// 	'https://exam-express.vercel.app/api/sensors'
+		// )
+		// 	.then(res => res.json())
+		// 	.then(data => {
+		// 		console.log(setListSensor(data))
+		// 	})
+		// 	.catch(err => console.log(err));
+		setListSensor(fakeData);
 	};
 
 	useEffect(() => {
-		(async () => {
-			// const response = await fetch('')
-			setListSensor(fakeData);
-		})();
+		getListSensor();
 	}, []);
 
-	useEffect(() => {
-		getDataSensor();
-	}, [listSensor])
+    document.addEventListener("dragstart", (event) => {
+        const target = event.target as Element;
+        event.dataTransfer?.setDragImage(target, window.outerWidth, window.outerHeight);
+    }, false);
 
 	return (
 		<div className={classes.container}>
@@ -123,34 +174,92 @@ const Dashboard = () => {
 						Add widget
 					</Button>
 				</Grid>
-				<Grid item xs={10} className={classes.listWidget}>
+				<Grid
+					item
+					xs={10}
+					className={classes.listWidget}
+					id="listWidget"
+				>
 					{listWidget?.map((item: ListWidgetState, index: number) => {
-						//@ts-ignore
-						const widget = listDataSensor?.[item?.sensor];
+						const widget = listSensor?.find(sensor => sensor?.sensorId === item?.sensor);
 						return (
-							<Grid item xs={3} key={item?.id}>
-								<div className={classes.widgetItem}>
-									<Grid item container xs={12} justifyContent='space-between' alignItems='center' className={classes.widgetName}>
-										<Grid item >
-											<Typography>{`${item?.name} 123123`}</Typography>
+							widget !== undefined && (
+								<Grid
+									item
+									xs={3}
+									key={item?.id}
+									id={item?.id}
+									onDragStart={e => onDragStart(e, item.id)}
+									onDragEnd={e => {
+                                        setCurrentMousePosition(undefined)
+                                    }}
+                                    onDrag={(e) => onDragging(e, item.id)}
+									className={classes.draggable}
+								>
+									<div
+                                        className={classes.widgetItem}
+                                    >
+										<Grid
+											item
+											container
+											xs={12}
+											justifyContent="space-between"
+											alignItems="center"
+											className={classes.widgetName}
+											draggable
+											spacing={3}
+										>
+											<Grid item>
+												<div>{item?.name}</div>
+											</Grid>
+											<Grid item>
+												<IconButton
+													onClick={(e) => {
+														handleClick(e);
+														setSelectedWidget(item)
+													}}
+												>
+													<ImportExportIcon />
+												</IconButton>
+												<IconButton
+													onClick={() => {
+														handleChangeWidget(index);
+													}}
+												>
+													<SyncIcon />
+												</IconButton>
+												<IconButton
+													onClick={() => {
+														handleRemoveWidgetById(item?.id);
+													}}
+												>
+													<CloseIcon />
+												</IconButton>
+											</Grid>
 										</Grid>
-										<Grid item >
-											<IconButton onClick={() => {handleRemoveWidgetById(item?.id)}}>
-												<CloseIcon />
-											</IconButton>
-										</Grid>
-									</Grid>
-									<div className={classes.widgetContent}>
-										{item?.widgetType === 1 ? (
-											<LineChart data={widget}/>
-										) : (
-											<SimpleValue data={widget} />
-										)}
+										<div className={classes.widgetContent}>
+											{item?.widgetType === 1 ? (
+												<LineChart data={widget} />
+											) : (
+												<SimpleValue data={widget} />
+											)}
+										</div>
 									</div>
-								</div>
-							</Grid>
-						)
+								</Grid>
+							)
+						);
 					})}
+					<Menu
+						anchorEl={anchorEl}
+						open={open}
+						onClose={handleClose}
+					>
+						{listSensor?.map((value) => (
+							<MenuItem key={value?.sensorId} onClick={() => handleChangeSensor(value?.sensorId)}>
+								{value?.sensor}
+							</MenuItem>
+						))}
+					</Menu>
 				</Grid>
 				<AddWidgetDialog
 					open={openDialogAddWidget}
