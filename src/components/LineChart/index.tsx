@@ -1,10 +1,6 @@
-import React from "react";
 import {
-	Chart as ChartJS,
-	ChartData,
-	ChartOptions,
-	registerables,
-	ScaleChartOptions,
+	Chart as ChartJS, ChartOptions,
+	registerables
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
@@ -28,21 +24,21 @@ const LineChart = ({ data }: LineChartProps) => {
 		],
 	};
 
-	const options: ChartOptions<'line'> = {
-        responsive: true,
+	const options: ChartOptions<"line"> = {
+		responsive: true,
 		scales: {
 			y: {
-                title: {
-                    text: `${data?.sensor} (${data?.unit})`,
-                    display: true
-                }
-            },
+				title: {
+					text: `${data?.sensor} (${data?.unit})`,
+					display: true,
+				},
+			},
 			x: {
-                title: {
-                    text: `Time (minutes)`,
-                    display: true
-                }
-            }
+				title: {
+					text: `Time (minutes)`,
+					display: true,
+				},
+			},
 		},
 	};
 

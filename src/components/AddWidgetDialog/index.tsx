@@ -1,18 +1,17 @@
 import {
-	Autocomplete,
-	Button,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
-	FormControl,
-	Grid,
-	InputLabel,
-	MenuItem,
-	Select,
-	TextField,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Select,
+    TextField
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { WIDGET_TYPE_OPTION } from "../../constants";
 import { generateGUID } from "../../helpers";
 
@@ -29,7 +28,7 @@ const AddWidgetDialog = ({
 	onClose = () => {},
 	handleClickAddWidget = () => {},
 }: AddWidgetDialogProps) => {
-	const [name, setName] = useState<string>("");
+	const [name, setName] = useState<string>('');
 	const [widgetType, setWidgetType] = useState<number>();
 	const [sensorId, setSensorId] = useState<number>();
 
@@ -74,12 +73,11 @@ const AddWidgetDialog = ({
 									label="Widget type"
 									value={widgetType}
 									onChange={(e) => {
-                                        //@ts-ignore
-                                        setWidgetType(e.target.value);
+                                        if (typeof e?.target?.value === 'number')
+                                            setWidgetType(e.target.value);
                                     }}
 								>
 									{WIDGET_TYPE_OPTION.map((item: WIDGET_TYPE, index: number) => (
-                                        //@ts-ignore
                                         <MenuItem value={item.value} key={index}>{item?.name}</MenuItem>
                                     ))}
 								</Select>
@@ -95,13 +93,11 @@ const AddWidgetDialog = ({
 									value={sensorId}
 									label="Sensor type"
 									onChange={(e) => {
-                                        console.log(e.target.value)
-                                        //@ts-ignore
-                                        setSensorId(e.target.value);
+                                        if (typeof e?.target?.value === 'number')
+                                            setSensorId(e.target.value);
                                     }}
 								>
 									{listSensor.map((item: ListSensorState, index: number) => (
-                                        //@ts-ignore
                                         <MenuItem value={item.sensorId} key={index}>{item?.sensor}</MenuItem>
                                     ))}
 								</Select>
@@ -111,7 +107,7 @@ const AddWidgetDialog = ({
 				</DialogContent>
 				<DialogActions>
 					<Button onClick={() => onClose()}>Close</Button>
-					<Button variant="contained" type="submit" disabled={(name === '') || (widgetType === undefined) || (sensorId === undefined)}>
+					<Button variant="contained" type="submit" disabled={ (name === '') || (widgetType === undefined) || (sensorId === undefined)}>
 						Add
 					</Button>
 				</DialogActions>
