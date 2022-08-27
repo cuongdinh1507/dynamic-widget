@@ -32,12 +32,6 @@ const AddWidgetDialog = ({
 	const [widgetType, setWidgetType] = useState<number>();
 	const [sensorId, setSensorId] = useState<number>();
 
-    useEffect(() => () => {
-        setName('');
-        setWidgetType(0);
-        setSensorId(0);
-    }, []);
-
 	return (
 		<Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
 			<DialogTitle>Add widget</DialogTitle>
@@ -51,6 +45,7 @@ const AddWidgetDialog = ({
 						sensor: sensorId,
 					});
                     onClose();
+					setName('');
 				}}
 			>
 				<DialogContent>
