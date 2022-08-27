@@ -139,14 +139,14 @@ const Dashboard = () => {
 	};
 
 	const getListSensor = () => {
-		// fetch(
-		// 	'https://exam-express.vercel.app/api/sensors'
-		// )
-		// 	.then(res => res.json())
-		// 	.then(data => {
-		// 		console.log(setListSensor(data))
-		// 	})
-		// 	.catch(err => console.log(err));
+		fetch(
+			'https://exam-express.vercel.app/api/sensors'
+		)
+			.then(res => res.json())
+			.then(data => {
+				console.log(data)
+			})
+			.catch(err => console.log(err));
 		setListSensor(fakeData);
 	};
 

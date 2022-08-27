@@ -86,7 +86,7 @@ const AddWidgetDialog = ({
 						<Grid item xs={12} className={"mt-3"}>
                             <FormControl fullWidth size='small'>
                                 <InputLabel id="sensor">
-									Widget type
+									Sensor type
 								</InputLabel>
 								<Select
 									labelId="sensor"
